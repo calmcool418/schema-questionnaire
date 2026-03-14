@@ -47,6 +47,12 @@ font-size:18px;
 margin-bottom:20px;
 }
 
+#report{
+background:white;
+padding:20px;
+margin-top:30px;
+}
+
 .controls{
 margin-top:20px;
 }
@@ -92,22 +98,30 @@ Rating scale:<br>
 <div id="question"></div>
 
 <div id="answers">
+
 <button onclick="answer(1)">1</button>
 <button onclick="answer(2)">2</button>
 <button onclick="answer(3)">3</button>
 <button onclick="answer(4)">4</button>
 <button onclick="answer(5)">5</button>
 <button onclick="answer(6)">6</button>
+
 </div>
+
+<div id="report" style="display:none">
 
 <div id="results"></div>
 
 <canvas id="schemaChart"></canvas>
-<canvas id="domainChart"></canvas>
+
+</div>
 
 <div class="controls">
+
 <button onclick="downloadPDF()">Download PDF</button>
+
 <button onclick="window.print()">Print Results</button>
+
 </div>
 
 <script>
@@ -276,11 +290,15 @@ const schemas={
 "Punitiveness":[18,36,54,72,90]
 }
 
-let labels=[]
-let scores=[]
-let results=[]
+let name=document.getElementById("clientName").value
+let date=document.getElementById("date").value
 
 let output="<h2>Schema Results</h2>"
+output+="Client: "+name+"<br>"
+output+="Date: "+date+"<br><br>"
+
+let labels=[]
+let scores=[]
 
 for(let s in schemas){
 
@@ -288,32 +306,59 @@ let total=schemas[s].reduce((sum,i)=>sum+(answers[i]||0),0)
 
 labels.push(s)
 scores.push(total)
-results.push({name:s,score:total})
 
 output+=s+": "+total+" ("+interpret(total)+")<br>"
 
 }
 
-results.sort((a,b)=>b.score-a.score)
-
-output+="<br><b>Top Schemas</b><br>"
-
-for(let i=0;i<3;i++){
-output+=results[i].name+" ("+results[i].score+")<br>"
-}
-
 document.getElementById("results").innerHTML=output
 
+document.getElementById("answers").style.display="none"
+document.getElementById("question").style.display="none"
+document.getElementById("progress").style.display="none"
+document.getElementById("progressbar").style.display="none"
+
+document.getElementById("report").style.display="block"
+
 new Chart(document.getElementById("schemaChart"),{
+
 type:"bar",
-data:{labels:labels,datasets:[{label:"Schema Scores",data:scores}]},
-options:{scales:{y:{beginAtZero:true,max:30}}}
+
+data:{
+labels:labels,
+datasets:[{
+label:"Schema Scores",
+data:scores
+}]
+},
+
+options:{
+scales:{
+y:{
+beginAtZero:true,
+max:30
+}
+}
+}
+
 })
 
 }
 
 function downloadPDF(){
-html2pdf().from(document.body).save("schema-results.pdf")
+
+const element=document.getElementById("report")
+
+const opt={
+margin:0.5,
+filename:"schema-results.pdf",
+image:{type:"jpeg",quality:0.98},
+html2canvas:{scale:2},
+jsPDF:{unit:"in",format:"letter",orientation:"portrait"}
+}
+
+html2pdf().set(opt).from(element).save()
+
 }
 
 showQuestion()
