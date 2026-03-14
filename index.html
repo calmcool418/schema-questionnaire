@@ -3,15 +3,7 @@
 <head>
 
 <title>Schema Questionnaire</title>
-<p>
-Client Name:<br>
-<input id="clientName" style="width:300px">
-</p>
 
-<p>
-Date:<br>
-<input type="date" id="date">
-</p>
 <style>
 
 body{
@@ -40,6 +32,16 @@ font-weight:bold;
 <body>
 
 <h2>Schema Questionnaire</h2>
+
+<p>
+Client Name:<br>
+<input id="clientName" style="width:300px">
+</p>
+
+<p>
+Date:<br>
+<input type="date" id="date">
+</p>
 
 <p id="progress"></p>
 
@@ -193,6 +195,16 @@ calculate()
 
 }
 
+function interpret(score){
+
+if(score>=25) return "Very High"
+if(score>=20) return "High"
+if(score>=15) return "Medium"
+if(score>=10) return "Low"
+return "Very Low"
+
+}
+
 function calculate(){
 
 const schemas={
@@ -218,14 +230,31 @@ const schemas={
 
 }
 
-let output="<h3>Your Schema Scores</h3>"
+let name=document.getElementById("clientName").value
+let date=document.getElementById("date").value
+
+let output="<h2>Schema Results</h2>"
+output+="Client: "+name+"<br>"
+output+="Date: "+date+"<br><br>"
+
+let results=[]
 
 for(let s in schemas){
 
 let total=schemas[s].reduce((sum,i)=>sum+(answers[i]||0),0)
 
-output+=s+": "+total+"<br>"
+results.push({name:s,score:total})
 
+output+=s+": "+total+" ("+interpret(total)+")<br>"
+
+}
+
+results.sort((a,b)=>b.score-a.score)
+
+output+="<br><b>Top Schemas</b><br>"
+
+for(let i=0;i<3;i++){
+output+=results[i].name+" ("+results[i].score+")<br>"
 }
 
 document.body.innerHTML=output
