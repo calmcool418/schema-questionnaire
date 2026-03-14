@@ -53,11 +53,16 @@ padding:20px;
 margin-top:30px;
 }
 
-.controls{
-margin-top:20px;
+.section{
+margin-top:25px;
+}
+
+.pagebreak{
+page-break-before:always;
 }
 
 canvas{
+max-width:100%;
 margin-top:30px;
 }
 
@@ -98,28 +103,53 @@ Rating scale:<br>
 <div id="question"></div>
 
 <div id="answers">
-
 <button onclick="answer(1)">1</button>
 <button onclick="answer(2)">2</button>
 <button onclick="answer(3)">3</button>
 <button onclick="answer(4)">4</button>
 <button onclick="answer(5)">5</button>
 <button onclick="answer(6)">6</button>
-
 </div>
 
 <div id="report" style="display:none">
 
-<div id="results"></div>
+<h2>Schema Results</h2>
 
+<p>
+<strong>Client:</strong> <span id="rname"></span><br>
+<strong>Date:</strong> <span id="rdate"></span>
+</p>
+
+<div class="section">
+<h3>Top Schemas</h3>
+<div id="topschemas"></div>
+</div>
+
+<div class="section">
+<h3>Schema Domains</h3>
+<div id="domains"></div>
+</div>
+
+<div class="section">
+<h3>Clinical Interpretation</h3>
+<div id="interpretation"></div>
+</div>
+
+<div class="section pagebreak">
+<h3>All Schema Scores</h3>
+<div id="results"></div>
+</div>
+
+<div class="section pagebreak">
+<h3>Schema Profile</h3>
 <canvas id="schemaChart"></canvas>
+</div>
 
 </div>
 
-<div class="controls">
+<div style="margin-top:20px">
 
 <button onclick="downloadPDF()">Download PDF</button>
-
 <button onclick="window.print()">Print Results</button>
 
 </div>
@@ -236,17 +266,16 @@ function showQuestion(){
 
 document.getElementById("question").innerText=questions[current]
 
-document.getElementById("progress").innerText=
-"Question "+(current+1)+" of "+questions.length
+document.getElementById("progress").innerText="Question "+(current+1)+" of "+questions.length
 
 let percent=(current/questions.length)*100
 document.getElementById("progressfill").style.width=percent+"%"
 
 }
 
-function answer(value){
+function answer(v){
 
-answers[current+1]=value
+answers[current+1]=v
 current++
 
 if(current<questions.length){
@@ -254,16 +283,6 @@ showQuestion()
 }else{
 calculate()
 }
-
-}
-
-function interpret(score){
-
-if(score>=25) return "Very High"
-if(score>=20) return "High"
-if(score>=15) return "Medium"
-if(score>=10) return "Low"
-return "Very Low"
 
 }
 
@@ -290,13 +309,7 @@ const schemas={
 "Punitiveness":[18,36,54,72,90]
 }
 
-let name=document.getElementById("clientName").value
-let date=document.getElementById("date").value
-
-let output="<h2>Schema Results</h2>"
-output+="Client: "+name+"<br>"
-output+="Date: "+date+"<br><br>"
-
+let results=[]
 let labels=[]
 let scores=[]
 
@@ -304,14 +317,25 @@ for(let s in schemas){
 
 let total=schemas[s].reduce((sum,i)=>sum+(answers[i]||0),0)
 
+results.push({schema:s,score:total})
+
 labels.push(s)
 scores.push(total)
 
-output+=s+": "+total+" ("+interpret(total)+")<br>"
-
 }
 
-document.getElementById("results").innerHTML=output
+results.sort((a,b)=>b.score-a.score)
+
+document.getElementById("topschemas").innerHTML=
+
+results.slice(0,3).map(x=>x.schema+" ("+x.score+")").join("<br>")
+
+document.getElementById("results").innerHTML=
+
+results.map(x=>x.schema+": "+x.score).join("<br>")
+
+document.getElementById("rname").innerText=document.getElementById("clientName").value
+document.getElementById("rdate").innerText=document.getElementById("date").value
 
 document.getElementById("answers").style.display="none"
 document.getElementById("question").style.display="none"
@@ -321,26 +345,9 @@ document.getElementById("progressbar").style.display="none"
 document.getElementById("report").style.display="block"
 
 new Chart(document.getElementById("schemaChart"),{
-
 type:"bar",
-
-data:{
-labels:labels,
-datasets:[{
-label:"Schema Scores",
-data:scores
-}]
-},
-
-options:{
-scales:{
-y:{
-beginAtZero:true,
-max:30
-}
-}
-}
-
+data:{labels:labels,datasets:[{label:"Schema Scores",data:scores}]},
+options:{scales:{y:{beginAtZero:true,max:30}}}
 })
 
 }
@@ -349,15 +356,13 @@ function downloadPDF(){
 
 const element=document.getElementById("report")
 
-const opt={
+html2pdf().set({
 margin:0.5,
 filename:"schema-results.pdf",
-image:{type:"jpeg",quality:0.98},
 html2canvas:{scale:2},
-jsPDF:{unit:"in",format:"letter",orientation:"portrait"}
-}
-
-html2pdf().set(opt).from(element).save()
+jsPDF:{unit:"in",format:"letter",orientation:"portrait"},
+pagebreak:{mode:["css","legacy"]}
+}).from(element).save()
 
 }
 
