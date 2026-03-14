@@ -5,12 +5,13 @@
 <title>Schema Questionnaire</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
 
 body{
 font-family:Arial;
-max-width:800px;
+max-width:900px;
 margin:auto;
 padding:40px;
 line-height:1.5;
@@ -48,6 +49,14 @@ margin-bottom:20px;
 
 #results{
 margin-top:30px;
+}
+
+#chart{
+margin-top:30px;
+}
+
+.controls{
+margin-top:20px;
 }
 
 </style>
@@ -100,6 +109,11 @@ Rating scale:<br>
 <div id="results"></div>
 
 <canvas id="chart"></canvas>
+
+<div class="controls">
+<button onclick="downloadPDF()">Download PDF</button>
+<button onclick="window.print()">Print Results</button>
+</div>
 
 <script>
 
@@ -224,7 +238,6 @@ document.getElementById("progressfill").style.width=percent+"%"
 function answer(value){
 
 answers[current+1]=value
-
 current++
 
 if(current<questions.length){
@@ -277,13 +290,13 @@ const schemas={
 let name=document.getElementById("clientName").value
 let date=document.getElementById("date").value
 
-let output="<h2>Schema Results</h2>"
-output+="Client: "+name+"<br>"
-output+="Date: "+date+"<br><br>"
-
 let labels=[]
 let scores=[]
 let results=[]
+
+let output="<h2>Schema Results</h2>"
+output+="Client: "+name+"<br>"
+output+="Date: "+date+"<br><br>"
 
 for(let s in schemas){
 
@@ -291,7 +304,6 @@ let total=schemas[s].reduce((sum,i)=>sum+(answers[i]||0),0)
 
 labels.push(s)
 scores.push(total)
-
 results.push({name:s,score:total})
 
 output+=s+": "+total+" ("+interpret(total)+")<br>"
@@ -335,6 +347,14 @@ max:30
 }
 
 })
+
+}
+
+function downloadPDF(){
+
+let element=document.body
+
+html2pdf().from(element).save("schema-results.pdf")
 
 }
 
