@@ -47,10 +47,6 @@ font-size:18px;
 margin-bottom:20px;
 }
 
-#report{
-margin-top:40px;
-}
-
 .section{
 margin-top:25px;
 }
@@ -102,6 +98,8 @@ Rating scale:<br>
 
 </div>
 
+<button onclick="previousQuestion()">Back</button>
+
 <div id="report" style="display:none">
 
 <h2>Schema Results</h2>
@@ -114,6 +112,11 @@ Rating scale:<br>
 <div class="section">
 <h3>Top Schemas</h3>
 <div id="topschemas"></div>
+</div>
+
+<div class="section">
+<h3>Schema Domains</h3>
+<div id="domains"></div>
 </div>
 
 <div class="section">
@@ -138,103 +141,103 @@ Rating scale:<br>
 
 const questions=[
 
-"I haven’t had someone to nurture me, share himself/herself with me, or care deeply about everything that happens to me.",
-"I find myself clinging to people I’m close to because I’m afraid they’ll leave me.",
+"I haven’t had someone to nurture me...",
+"I find myself clinging to people...",
 "I feel that people will take advantage of me.",
 "I don’t fit in.",
 "No man/woman I desire could love me once he or she saw my defects or flaws.",
-"Almost nothing I do at work (or school) is as good as other people can do.",
-"I do not feel capable of getting by on my own in everyday life.",
-"I can’t seem to escape the feeling that something bad is about to happen.",
-"I have not been able to separate myself from my parent(s) the way other people my age seem to.",
-"I think that if I do what I want, I’m only asking for trouble.",
+"Almost nothing I do at work is as good as other people can do.",
+"I do not feel capable of getting by on my own.",
+"I feel something bad will happen.",
+"I have difficulty separating from parents.",
+"I feel trouble if I do what I want.",
 
-"I’m the one who usually ends up taking care of the people I’m close to.",
-"I am too self-conscious to show positive feelings to others.",
-"I must be the best at most of what I do; I can’t accept second best.",
-"I have trouble accepting “no” for an answer.",
-"I can’t seem to discipline myself to complete routine tasks.",
-"Having money and knowing important people make me feel worthwhile.",
-"Even when things go well, I feel it is only temporary.",
-"If I make a mistake, I deserve to be punished.",
-"I don’t have people to give me warmth and affection.",
-"I need other people so much that I worry about losing them.",
+"I take care of people close to me.",
+"I feel self-conscious expressing feelings.",
+"I must be the best.",
+"I dislike hearing no.",
+"I struggle completing routine tasks.",
+"Status makes me feel worthwhile.",
+"Good things feel temporary.",
+"Mistakes deserve punishment.",
+"I lack warmth from others.",
+"I fear losing people.",
 
-"I cannot let my guard down with people.",
-"I’m fundamentally different from others.",
-"No one would want to stay close if they knew the real me.",
-"I’m incompetent when it comes to achievement.",
-"I think of myself as dependent in everyday life.",
-"A disaster could strike at any moment.",
-"My parents and I are over-involved in each other’s lives.",
-"I feel I must give in to others.",
-"I am a good person because I think of others first.",
-"I find it embarrassing to express feelings.",
+"I cannot let my guard down.",
+"I feel different from others.",
+"I feel flawed.",
+"I feel incompetent.",
+"I feel dependent.",
+"I expect disasters.",
+"I feel enmeshed with parents.",
+"I give in to others.",
+"I put others first.",
+"I hide emotions.",
 
-"I try to do my best; I can’t settle for good enough.",
-"I’m special and shouldn’t have to follow many rules.",
-"If I can’t reach a goal I get frustrated and quit.",
-"Accomplishments matter most if people notice.",
-"If something good happens I expect something bad.",
-"If I don’t try my hardest I should expect to lose.",
-"I haven’t felt special to someone.",
-"I worry people I love will leave.",
-"It’s only a matter of time before someone betrays me.",
-"I don’t belong.",
+"I strive for perfection.",
+"I feel special.",
+"I quit when frustrated.",
+"I want recognition.",
+"I expect bad outcomes.",
+"I must try hardest.",
+"I feel unnoticed.",
+"I fear abandonment.",
+"I expect betrayal.",
+"I feel I don't belong.",
 
-"I’m unworthy of love or respect.",
-"Most people are more capable than I am.",
-"I lack common sense.",
-"I worry about being attacked.",
-"It’s difficult for my parents and me to keep boundaries.",
-"In relationships I let the other person have control.",
-"I’m so busy helping others I neglect myself.",
-"I struggle to be spontaneous around people.",
-"I must meet all responsibilities.",
-"I hate being restricted.",
+"I feel unworthy.",
+"I feel less capable.",
+"I lack judgment.",
+"I fear attacks.",
+"I struggle with boundaries.",
+"I give others control.",
+"I neglect myself helping others.",
+"I suppress spontaneity.",
+"I must meet duties.",
+"I dislike limits.",
 
-"I struggle to delay gratification.",
-"I feel less important without attention.",
-"You can’t be too careful; something will go wrong.",
-"If I don’t do a job right I should suffer.",
-"No one truly listens to me.",
-"When someone pulls away I feel desperate.",
-"I’m suspicious of others’ motives.",
-"I feel cut off from people.",
+"I cannot delay gratification.",
+"I need attention.",
+"I expect problems.",
+"I punish myself.",
+"I feel unheard.",
+"I feel desperate if people pull away.",
+"I distrust motives.",
+"I feel disconnected.",
 "I feel unlovable.",
-"I’m not as talented as most people.",
+"I feel less talented.",
 
-"My judgment can’t be trusted.",
-"I worry about becoming poor.",
+"I distrust my judgment.",
+"I fear poverty.",
 "My parents live through me.",
-"I let others make choices for me.",
-"I listen to everyone else’s problems.",
-"I control my emotions too much.",
-"There is constant pressure to achieve.",
-"I shouldn’t have to follow normal rules.",
-"I can’t force myself to do unpleasant tasks.",
-"It’s important for me to receive admiration.",
+"I let others decide.",
+"I listen to everyone's problems.",
+"I suppress feelings.",
+"I feel pressure to achieve.",
+"I dislike rules.",
+"I avoid unpleasant tasks.",
+"I seek admiration.",
 
-"No matter how hard I work I could lose everything.",
-"When I do something wrong I must pay.",
-"I haven’t had wise guidance when uncertain.",
-"I worry people will leave me.",
-"I watch for hidden motives.",
-"I feel like an outsider.",
-"I’m too flawed to reveal myself.",
-"I’m not as intelligent as most people.",
-"I lack confidence solving problems.",
-"I worry about serious illness.",
+"I fear losing everything.",
+"I punish mistakes.",
+"I lack guidance.",
+"I fear abandonment.",
+"I watch for betrayal.",
+"I feel outsider.",
+"I hide flaws.",
+"I feel unintelligent.",
+"I lack confidence.",
+"I fear illness.",
 
-"I don’t have a separate identity from close others.",
-"I struggle to demand respect.",
-"I do too much for others.",
-"People see me as emotionally controlled.",
-"I can’t forgive myself for mistakes.",
-"My contributions are more valuable than others.",
-"I rarely keep resolutions.",
-"Compliments make me feel worthwhile.",
-"A wrong decision could lead to disaster.",
+"I lack identity separate from others.",
+"I struggle asserting myself.",
+"I overhelp others.",
+"I appear emotionally controlled.",
+"I cannot forgive mistakes.",
+"I feel superior.",
+"I break resolutions.",
+"I rely on compliments.",
+"I fear wrong decisions.",
 "I deserve punishment."
 
 ]
@@ -262,6 +265,15 @@ if(current<questions.length){
 showQuestion()
 }else{
 calculate()
+}
+
+}
+
+function previousQuestion(){
+
+if(current>0){
+current--
+showQuestion()
 }
 
 }
