@@ -5,7 +5,7 @@
 <title>Schema Questionnaire</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
 
@@ -48,22 +48,11 @@ margin-bottom:20px;
 }
 
 #report{
-background:white;
-padding:20px;
-margin-top:30px;
+margin-top:40px;
 }
 
 .section{
 margin-top:25px;
-}
-
-.pagebreak{
-page-break-before:always;
-}
-
-canvas{
-max-width:100%;
-margin-top:30px;
 }
 
 </style>
@@ -103,12 +92,14 @@ Rating scale:<br>
 <div id="question"></div>
 
 <div id="answers">
+
 <button onclick="answer(1)">1</button>
 <button onclick="answer(2)">2</button>
 <button onclick="answer(3)">3</button>
 <button onclick="answer(4)">4</button>
 <button onclick="answer(5)">5</button>
 <button onclick="answer(6)">6</button>
+
 </div>
 
 <div id="report" style="display:none">
@@ -126,22 +117,11 @@ Rating scale:<br>
 </div>
 
 <div class="section">
-<h3>Schema Domains</h3>
-<div id="domains"></div>
-</div>
-
-<div class="section">
-<h3>Clinical Interpretation</h3>
-<div id="interpretation"></div>
-</div>
-
-<div class="section pagebreak">
 <h3>All Schema Scores</h3>
 <div id="results"></div>
 </div>
 
-<div class="section pagebreak">
-<h3>Schema Profile</h3>
+<div class="section">
 <canvas id="schemaChart"></canvas>
 </div>
 
@@ -327,11 +307,9 @@ scores.push(total)
 results.sort((a,b)=>b.score-a.score)
 
 document.getElementById("topschemas").innerHTML=
-
 results.slice(0,3).map(x=>x.schema+" ("+x.score+")").join("<br>")
 
 document.getElementById("results").innerHTML=
-
 results.map(x=>x.schema+": "+x.score).join("<br>")
 
 document.getElementById("rname").innerText=document.getElementById("clientName").value
@@ -354,15 +332,42 @@ options:{scales:{y:{beginAtZero:true,max:30}}}
 
 function downloadPDF(){
 
-const element=document.getElementById("report")
+const { jsPDF } = window.jspdf
+const doc = new jsPDF()
 
-html2pdf().set({
-margin:0.5,
-filename:"schema-results.pdf",
-html2canvas:{scale:2},
-jsPDF:{unit:"in",format:"letter",orientation:"portrait"},
-pagebreak:{mode:["css","legacy"]}
-}).from(element).save()
+let y=20
+
+doc.setFontSize(18)
+doc.text("Schema Results",20,y)
+y+=10
+
+doc.setFontSize(12)
+doc.text("Client: "+document.getElementById("rname").innerText,20,y)
+y+=8
+doc.text("Date: "+document.getElementById("rdate").innerText,20,y)
+y+=12
+
+doc.setFontSize(14)
+doc.text("Schema Scores",20,y)
+y+=10
+
+const lines=document.getElementById("results").innerText.split("\n")
+
+doc.setFontSize(11)
+
+lines.forEach(line=>{
+
+if(y>270){
+doc.addPage()
+y=20
+}
+
+doc.text(line,20,y)
+y+=7
+
+})
+
+doc.save("schema-results.pdf")
 
 }
 
