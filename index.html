@@ -4,11 +4,13 @@
 
 <title>Schema Questionnaire</title>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
 
 body{
 font-family:Arial;
-max-width:700px;
+max-width:800px;
 margin:auto;
 padding:40px;
 line-height:1.5;
@@ -18,11 +20,34 @@ button{
 margin:6px;
 padding:10px 16px;
 font-size:16px;
+cursor:pointer;
 }
 
 #progress{
-margin-bottom:20px;
+margin-bottom:10px;
 font-weight:bold;
+}
+
+#progressbar{
+width:100%;
+height:12px;
+background:#eee;
+margin-bottom:20px;
+}
+
+#progressfill{
+height:12px;
+background:#4CAF50;
+width:0%;
+}
+
+#question{
+font-size:18px;
+margin-bottom:20px;
+}
+
+#results{
+margin-top:30px;
 }
 
 </style>
@@ -43,7 +68,21 @@ Date:<br>
 <input type="date" id="date">
 </p>
 
-<p id="progress"></p>
+<p>
+Rating scale:<br>
+1 = Completely untrue of me<br>
+2 = Mostly untrue<br>
+3 = Slightly more true than untrue<br>
+4 = Moderately true of me<br>
+5 = Mostly true of me<br>
+6 = Describes me perfectly
+</p>
+
+<div id="progress"></div>
+
+<div id="progressbar">
+<div id="progressfill"></div>
+</div>
 
 <div id="question"></div>
 
@@ -59,6 +98,8 @@ Date:<br>
 </div>
 
 <div id="results"></div>
+
+<canvas id="chart"></canvas>
 
 <script>
 
@@ -175,6 +216,9 @@ document.getElementById("question").innerText=questions[current]
 document.getElementById("progress").innerText=
 "Question "+(current+1)+" of "+questions.length
 
+let percent=((current)/questions.length)*100
+document.getElementById("progressfill").style.width=percent+"%"
+
 }
 
 function answer(value){
@@ -237,11 +281,16 @@ let output="<h2>Schema Results</h2>"
 output+="Client: "+name+"<br>"
 output+="Date: "+date+"<br><br>"
 
+let labels=[]
+let scores=[]
 let results=[]
 
 for(let s in schemas){
 
 let total=schemas[s].reduce((sum,i)=>sum+(answers[i]||0),0)
+
+labels.push(s)
+scores.push(total)
 
 results.push({name:s,score:total})
 
@@ -257,7 +306,35 @@ for(let i=0;i<3;i++){
 output+=results[i].name+" ("+results[i].score+")<br>"
 }
 
-document.body.innerHTML=output
+document.getElementById("results").innerHTML=output
+
+document.getElementById("answers").style.display="none"
+document.getElementById("question").style.display="none"
+document.getElementById("progress").style.display="none"
+document.getElementById("progressbar").style.display="none"
+
+new Chart(document.getElementById("chart"),{
+
+type:"bar",
+
+data:{
+labels:labels,
+datasets:[{
+label:"Schema Scores",
+data:scores
+}]
+},
+
+options:{
+scales:{
+y:{
+beginAtZero:true,
+max:30
+}
+}
+}
+
+})
 
 }
 
