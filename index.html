@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Schema Questionnaire</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+body{
+font-family:Arial;
+max-width:700px;
+margin:auto;
+padding:30px;
+}
+
+#progressbar{
+width:100%;
+height:12px;
+background:#eee;
+margin-bottom:20px;
+}
+
+#progressfill{
+height:12px;
+background:#4CAF50;
+width:0%;
+}
+
+.scale button{
+margin:5px;
+padding:10px 15px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2>Schema Questionnaire</h2>
+
+<p id="progressText"></p>
+
+<div id="progressbar">
+<div id="progressfill"></div>
+</div>
+
+<h3 id="questionText"></h3>
+
+<div class="scale">
+
+<button onclick="answer(1)">1</button>
+<button onclick="answer(2)">2</button>
+<button onclick="answer(3)">3</button>
+<button onclick="answer(4)">4</button>
+<button onclick="answer(5)">5</button>
+<button onclick="answer(6)">6</button>
+
+</div>
+
+<div id="results"></div>
+
+<canvas id="chart"></canvas>
+
+<script>
+
+const questions = [
+
+"I haven’t had someone to nurture me or care deeply about everything that happens to me.",
+"I worry people I feel close to will leave me.",
+"I feel people will hurt or use me.",
+"I feel different from other people.",
+"I feel fundamentally flawed or unlovable.",
+"I feel inadequate compared with others.",
+"I feel unable to handle everyday responsibilities without help.",
+"I worry something terrible could happen at any time.",
+"I feel too connected to my parents to fully develop my own identity.",
+"I tend to submit to others to avoid conflict."
+
+]
+
+const schemas = {
+
+"Emotional Deprivation":[1,19,37,55,73],
+"Abandonment":[2,20,38,56,74],
+"Mistrust":[3,21,39,57,75],
+"Social Isolation":[4,22,40,58,76],
+"Defectiveness":[5,23,41,59,77],
+"Failure":[6,24,42,60,78],
+"Dependence":[7,25,43,61,79],
+"Vulnerability":[8,26,44,62,80],
+"Enmeshment":[9,27,45,63,81],
+"Subjugation":[10,28,46,64,82],
+"Self-Sacrifice":[11,29,47,65,83],
+"Emotional Inhibition":[12,30,48,66,84],
+"Unrelenting Standards":[13,31,49,67,85],
+"Entitlement":[14,32,50,68,86],
+"Insufficient Self-Control":[15,33,51,69,87],
+"Approval Seeking":[16,34,52,70,88],
+"Negativity":[17,35,53,71,89],
+"Punitiveness":[18,36,54,72,90]
+
+}
+
+let answers=[]
+let current=0
+
+function showQuestion(){
+
+document.getElementById("questionText").innerText =
+questions[current]
+
+document.getElementById("progressText").innerText =
+"Question "+(current+1)+" of "+questions.length
+
+let percent=((current)/questions.length)*100
+
+document.getElementById("progressfill").style.width=
+percent+"%"
+
+}
+
+function answer(value){
+
+answers[current+1]=value
+
+current++
+
+if(current<questions.length){
+
+showQuestion()
+
+}else{
+
+calculate()
+
+}
+
+}
+
+function interpret(score){
+
+if(score>=25) return "Very High"
+if(score>=20) return "High"
+if(score>=15) return "Medium"
+if(score>=10) return "Low"
+return "Very Low"
+
+}
+
+function calculate(){
+
+let labels=[]
+let data=[]
+let text=""
+
+for(let s in schemas){
+
+let items=schemas[s]
+
+let total=items.reduce((sum,i)=>sum+(answers[i]||0),0)
+
+labels.push(s)
+data.push(total)
+
+text+=s+": "+total+" ("+interpret(total)+")<br>"
+
+}
+
+document.body.innerHTML="<h2>Schema Results</h2>"+text+
+"<canvas id='chart'></canvas>"
+
+new Chart(document.getElementById("chart"),{
+
+type:"bar",
+
+data:{
+labels:labels,
+datasets:[{
+label:"Schema Scores",
+data:data
+}]
+}
+
+})
+
+}
+
+showQuestion()
+
+</script>
+
+</body>
+</html>
